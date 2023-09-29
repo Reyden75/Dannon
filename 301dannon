@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+
+import sys
+import re
+
+quickSortComparisons = 0
+mergeSortComparisons = 0
+
+def selectionSort(list):
+    comparison = 0
+    first = 0
+    while first < len(list) - 1:
+        second = first
+        while second < len(list) - 1:
+            comparison += 1
+            second += 1
+        first += 1
+    print("Selection sort:", comparison, "comparisons")
+
+def insertionSort(list):
+    to_sort = []
+    to_sort.extend(list)
+    i = 1
+    comparison = 0
+    for i in range(len(to_sort)):
+        j = i
+        while (j > 0):
+            comparison += 1
+            if to_sort[j] >= to_sort[j - 1]:
+                to_sort[j], to_sort[j - 1] = to_sort[j - 1], to_sort[j]
+            else:
+                break;
+            j -= 1
+    print("Insertion sort:", comparison, "comparisons")
+
+def bubbleSort(list):
+    to_sort = []
+    to_sort.extend(list)
+    comparison = 0
+    for i in range(0, len(to_sort) - 1):
+        for j in range(0, len(to_sort) - i - 1):
+            comparison += 1
+            if (to_sort[j] > to_sort[j + 1]):
+                to_sort[j], to_sort[j + 1] = to_sort[j + 1], to_sort[j]
+    print("Bubble sort:", comparison, "comparisons")    
+
+def pivot(list, first, last):
+    global quickSortComparisons
+    i = first
+    pivot = list[first]
+    for j in range(first + 1, last):
+        quickSortComparisons += 1
+        if (list[j] < pivot):
+            i += 1
+            list.insert(i, list[j])
+            list.pop(j + 1)
+    list.insert(i + 1, pivot)
+    list.pop(first)
+    return i
+
+def quickSort(list, first, last):
+    if first < last - 1:
+        p = pivot(list, first, last)
+        quickSort(list, first, p)
+        quickSort(list, p + 1, last)
+
+def mergeThem(list, ll, rl):
+    global mergeSortComparisons
+    p = 0
+    q = 0
+    k = 0
+    while p < len(ll) and q < len(rl):
+        mergeSortComparisons += 1
+        if (ll[p] > rl[q]):
+            list[k] = rl[q]
+            q += 1
+            k += 1
+        else:
+            list[k] = ll[p]
+            p += 1
+            k += 1
+    for p in range(p, len(ll)):
+        list[k] = ll[p]
+        k += 1
+    for q in range(q, len(ll)):
+        list[k] = rl[q]
+        k += 1
+
+def mergeSort(list):
+    if len(list) == 1:
+        return
+    middle = len(list)//2
+    ll = list[:middle]
+    rl = list[middle:]
+    mergeSort(ll)
+    mergeSort(rl)
+    mergeThem(list, ll, rl)
+
+def parseFile(file):
+    file = open(file, 'r')
+    buffer = file.read()
+    file.close()
+    buffer = buffer.strip()
+    cleanedBuffer = re.split(' |\n', buffer)
+    cleanedBuffer = [float(i) for i in cleanedBuffer]
+    return cleanedBuffer
+
+def help_usage():
+    print("USAGE")
+    print("    ./301dannon file")
+    print("DESCRIPTION")
+    print("    file    file that contains the numbers to be sorted, separated by spaces")
+
+try:
+    if len(sys.argv) == 2 and sys.argv[1] == "-h":
+            help_usage()
+    elif len(sys.argv) == 2:
+        list = parseFile(sys.argv[1])
+        if len(list) == 1:
+            print(len(list), "element")
+        else:
+            print(len(list), "elements")
+        selectionSort(list)
+        insertionSort(list)
+        bubbleSort(list)
+        to_sort = []
+        to_sort.extend(list)
+        quickSort(to_sort, 0, len(to_sort))
+        print("Quicksort:", quickSortComparisons, "comparisons")
+        to_sort = []
+        to_sort.extend(list)
+        mergeSort(to_sort)
+        print("Merge sort:", mergeSortComparisons, "comparisons")
+        exit(0)
+    else:
+        raise Exception("Invalid number of arguments !\n")
+except Exception as error:
+    sys.stdout.write(str(error))
+    exit(84)
